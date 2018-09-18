@@ -5,7 +5,6 @@
 package scaled.impl
 
 import java.awt.Desktop
-import java.io.File
 import java.nio.file.{Path, Paths}
 import java.util.concurrent.Executors
 import java.util.{List => JList, ArrayList, Timer, TimerTask}
@@ -14,7 +13,9 @@ import javafx.application.{Application, Platform}
 import javafx.event.{ActionEvent, EventHandler}
 import javafx.stage.Stage
 import javafx.util.Duration
+import javax.swing.ImageIcon
 import scaled._
+import scaled.pacman.Pacman
 import scaled.util.Errors
 
 class Scaled extends Application with Editor {
@@ -61,6 +62,17 @@ class Scaled extends Application with Editor {
   private def handleError (err :Throwable) = logger.log(Errors.stackTraceToString(err))
   override val exec = new Executor(uiScheduler, bgScheduler, handleError, Some(pool))
 
+  /**
+    * If not javapackager deployed we still want an icon even if it's delayed
+    */
+  private def showIcon() = {
+    if (System.getProperty("os.name") == "Mac OS X") {
+      val iconFileURL = Pacman.repo.packageDir("scaled/etc/icon.png").toString
+      com.apple.eawt.Application.getApplication.setDockIconImage(new ImageIcon(iconFileURL).getImage);
+    }
+    // Windows and Linux don't get icons yet.
+  }
+
   val server = new Server(this)
   val pkgMgr = new PackageManager(logger)
   val wspMgr = new WorkspaceManager(this)
@@ -85,6 +97,8 @@ class Scaled extends Application with Editor {
     wspMgr.visit(stage, argvFiles ++ Scaled.openFiles())
     // listen for open files events
     Scaled.openFiles.via(uiScheduler).onValue { _.foreach(wspMgr.visit) }
+    // set the icon
+    showIcon()
     // start our command server
     server.start()
   }
