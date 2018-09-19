@@ -3,8 +3,8 @@ BINDIR=`dirname $0`
 ROOTDIR=`cd $BINDIR/.. ; pwd`
 
 if [ -z "`identify -list format | grep PNG`" ]; then
-  echo 'Please install Image as PNG is not an identifiable format https://stackoverflow.com/a/10319327'
-  echo 'If you have brew run:'
+  echo 'Please install libpng as PNG is not an identifiable format https://stackoverflow.com/a/10319327'
+  echo 'Example on OSX:'
   echo 'brew install libpng'
   exit 1
 fi
